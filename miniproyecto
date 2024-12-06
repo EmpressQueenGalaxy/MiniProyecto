@@ -1,0 +1,251 @@
+import java.util.Scanner;
+
+public class Main {
+
+    public static void subMenuFotocopias(Negocio local, Scanner getDate) {
+        int tipoCopia, cantiC, valorVenta, tiposervicio, largo = 0, ancho = 0, AfichePlano = 0;
+        boolean datoCorrecto = false, registroExitoso = false;
+
+        // Verificar el dato de tipo de impresión
+        do {
+            System.out.println("Tipo de Impresion: ");
+            for (int i = 0; i < local.getLisFotocopias().size(); i++) {
+                // Mostrar los servicios disponibles
+                System.out.println("(" + (i + 1) + ") " + local.getLisFotocopias().get(i).getTiposervicio());
+            }
+            System.out.print("Opcion: ");
+            tiposervicio = getDate.nextInt();
+
+            // Verificar si el dato es correcto
+            if (tiposervicio >= 1 && tiposervicio <= local.getLisFotocopias().size()) {
+                datoCorrecto = true;
+            } else {
+                System.out.println("El dato ingresado es Incorrecto");
+            }
+        } while (!datoCorrecto);
+
+        // Mostrar niveles de tinta de la impresora seleccionada
+        // Llama a mostrarNivelesTinta con los argumentos correctos
+        mostrarNivelesTinta(local, getDate); // Cambiado aquí
+
+        // Obtener la impresora seleccionada
+        Impresoras seleccionada = local.getLisFotocopias().get(tiposervicio - 1);
+
+        // Verificar e ingresar los datos correctos
+        do {
+            System.out.println("Ingrese los datos de las Fotocopia");
+            System.out.print("(1) Color  (2) Blanco y negro: ");
+            tipoCopia = getDate.nextInt();
+
+            if (tipoCopia == 1 || tipoCopia == 2) {
+                datoCorrecto = true;
+            } else {
+                datoCorrecto = false;
+            }
+
+            if (tiposervicio == 3) { // Para plotter
+                System.out.println("Ingrese los datos de las Fotocopia plotter");
+                System.out.print("(1) Afiche publicitario  (2) Plano arquitectónico: ");
+                AfichePlano = getDate.nextInt();
+                System.out.println("Por favor ingrese el ancho: ");
+                ancho = getDate.nextInt();
+                System.out.println("Por favor ingrese el largo: ");
+                largo = getDate.nextInt();
+            }
+
+            if (!datoCorrecto) {
+                System.out.println("El dato ingresado es Incorrecto");
+            }
+
+            System.out.print("Cantidad de Copias: ");
+            cantiC = getDate.nextInt();
+            System.out.print("Valor Pagado: ");
+            valorVenta = getDate.nextInt();
+        } while (!datoCorrecto);
+
+        // Verificar si el registro del plotter es correcto
+        if (tiposervicio == 3) {
+            if (local.registrarPlotter(AfichePlano, tipoCopia, cantiC, valorVenta, tiposervicio, ancho, largo)) {
+                registroExitoso = true;
+            }
+        } else if (local.registrar(tipoCopia, cantiC, valorVenta, tiposervicio)) {
+            registroExitoso = true;
+        }
+
+        // Verificar si el registro de la fotocopia fue exitoso o fallido
+        if (!registroExitoso) {
+            System.out.println("!!!! Error en el ingreso de los datos");
+        } else {
+            System.out.println("Registro Exitoso");
+        }
+    }
+
+    public static void mostrarDetallesImpresora(Negocio local) {
+        Impresoras impresoraMenosGanancia = local.impresoraMenosGanancia();
+        Impresoras impresoraMayorConsumo = local.impresoraMayorConsumo();
+
+        if (impresoraMenosGanancia != null) {
+            System.out.println("La impresora con menos ganancia es: " + impresoraMenosGanancia.getTiposervicio() + " con una ganancia de " + impresoraMenosGanancia.ganancia());
+        } else {
+            System.out.println("No hay impresoras con ganancias registradas.");
+        }
+
+        if (impresoraMayorConsumo != null) {
+            System.out.println("La impresora con mayor consumo de tinta es: " + impresoraMayorConsumo.getTiposervicio());
+        } else {
+            System.out.println("No hay impresoras registradas.");
+        }
+    }
+
+    public static void mostrarNivelesTinta(Negocio local, Scanner getDate) {
+        System.out.println("Seleccione una impresora para ver sus niveles de tinta:");
+        for (int i = 0; i < local.getLisFotocopias().size(); i++) {
+            Impresoras impresora = local.getLisFotocopias().get(i);
+            System.out.println("(" + (i + 1) + ") " + impresora.getTiposervicio() + " - Precio: " + impresora.getValorVentaHC());
+        }
+
+        System.out.print("Opción: ");
+        int opcionImpresora = getDate.nextInt();
+
+        if (opcionImpresora >= 1 && opcionImpresora <= local.getLisFotocopias().size()) {
+            Impresoras seleccionada = local.getLisFotocopias().get(opcionImpresora - 1);
+            mostrarNivelesTintaImp(seleccionada);
+        } else {
+            System.out.println("Impresora no encontrada.");
+        }
+    }
+
+    public static void mostrarNivelesTintaImp(Impresoras impresora) {
+        System.out.println("Niveles de tinta para " + impresora.getTiposervicio() + ":");
+        System.out.printf("Cian: %.2f%%\n", impresora.getTintaCian());
+        System.out.printf("Magenta: %.2f%%\n", impresora.getTintaMagenta());
+        System.out.printf("Amarillo: %.2f%%\n", impresora.getTintaAmarillo());
+        System.out.printf("Negro: %.2f%%\n", impresora.getTintaNegro());
+    }
+
+    public static void subMenuOperadores(Negocio local, Scanner getDate) {
+        int operadorSeleccionado, tipoServicio, cantidad, valorVenta;
+        boolean datoCorrecto;
+        //verificar que tipo de operador se va a seleccionar
+        do {
+            System.out.println("Tipo de Operador:");
+            for (int i = 0; i < local.getLisOperadores().size(); i++) {
+                System.out.println(" (" + (i + 1) + ") " + local.getLisOperadores().get(i).getNombre());
+            }
+            System.out.print("Opción: ");
+            operadorSeleccionado = getDate.nextInt();
+
+            datoCorrecto = operadorSeleccionado > 0 && operadorSeleccionado <= local.getLisOperadores().size();
+            if (!datoCorrecto) System.out.println("Dato Incorrecto");
+
+        } while (!datoCorrecto);
+
+        System.out.println("Ingrese el tipo de servicio:");
+        System.out.println("(1) Venta de minutos (2) Venta de Sim Cards");
+        tipoServicio = getDate.nextInt();
+
+        System.out.print("Cantidad: ");
+        cantidad = getDate.nextInt();
+        System.out.print("Valor pagado: ");
+        valorVenta = getDate.nextInt();
+        //operador seleccionado es cual operador se selecciona
+
+        if (tipoServicio == 1) {
+            if (local.registrarOperador(operadorSeleccionado-1,tipoServicio, cantidad, valorVenta))
+                System.out.println("Registro de minutos exitoso");
+            else
+                System.out.println("Error en el ingreso de los datos");
+        } else if (tipoServicio == 2) {
+            if (local.registrarOperador(operadorSeleccionado - 1,tipoServicio, cantidad, valorVenta))
+                System.out.println("Registro de Sim Cards exitoso");
+            else
+                System.out.println("Error en el ingreso de los datos");
+        }
+    }
+
+    public static void subMenuCierredia(Negocio local) {
+        int sumaC = 0, gananciaC = 0, costoC = 0; // Variables para fotocopias
+        int sumaOp = 0, gananciaOp = 0, costoOp = 0; // Variables para operadores
+
+        // Para los datos de copias
+        for (int i = 0; i < local.getLisFotocopias().size(); i++) {
+            sumaC += local.getLisFotocopias().get(i).monto();
+            gananciaC += local.getLisFotocopias().get(i).ganancia();
+            costoC += local.getLisFotocopias().get(i).costo();
+        }
+
+        // Para los datos para operadores
+        for (int i = 0; i < local.getLisOperadores().size(); i++) {
+            sumaOp += local.getLisOperadores().get(i).valorRecolectado();
+            gananciaOp += local.getLisOperadores().get(i).ganancia();
+            costoOp += local.getLisOperadores().get(i).costo();
+        }
+
+        System.out.println(" ***************** El cierre del día sobre las fotocopias es  : ");
+        System.out.println("Valor recolectado Copias = " + sumaC);
+        System.out.println("Ganancia Copias = " + gananciaC);
+        System.out.println("Costo Copias = " + costoC);
+
+        System.out.println(" ***************** El cierre del día de los operadores es : ");
+        System.out.println("Valor recolectado Operadores = " + sumaOp);
+        System.out.println("Ganancia Operadores = " + gananciaOp);
+        System.out.println("Costo Operadores = " + costoOp);
+
+        int sumadia = sumaOp + sumaC;
+        int gananciadia = gananciaOp + gananciaC - (local.getCostoEnergia() + local.getCostoEmpleadoDia());
+        int costodia = costoOp + costoC + local.getCostoEmpleadoDia() + local.getCostoEnergia();
+
+        System.out.println(" ************ RESUMEN TOTAL **************** ");
+        System.out.println(" Monto Día " + sumadia);
+        System.out.println(" Ganancia Día " + gananciadia);
+        System.out.println(" Gastos Día  " + costodia);
+
+        if (gananciaC > gananciaOp) {
+            System.out.println(" Las Copias tuvieron más ganancia que los operadores ");
+        } else {
+            System.out.println(" Los Operadores tuvieron más ganancia que las Fotocopias ");
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("**************  Negocio **********\n");
+        Negocio local = new Negocio(35000, 12500);
+
+        Scanner getDate = new Scanner(System.in);
+        String opcion;
+        do {
+            System.out.println("(1) Telefonia");
+            System.out.println("(2) Impresiones");
+            System.out.println("(3) Cierre Día");
+            System.out.println("(4) Mostrar impresoras: menor ganancia y mayor consumo");
+            System.out.println("(5) Mostrar niveles de tinta de una impresora");
+            System.out.println("(6) Salir");
+            System.out.print("Opcion:");
+            opcion = getDate.next();
+            switch (opcion) {
+                case "1":
+                    subMenuOperadores(local, getDate);
+                    break;
+                case "2":
+                    subMenuFotocopias(local, getDate);
+                    break;
+                case "3":
+                    subMenuCierredia(local);
+                    break;
+                case "4":
+                    mostrarDetallesImpresora(local);
+                    break;
+                case "5":
+                    mostrarNivelesTinta(local, getDate); // Aquí se llama correctamente
+                    break;
+                case "6":
+                    System.out.println("Saliendo...");
+                    break;
+                default:
+                    System.out.println("Opción no válida. Intente nuevamente.");
+                    break;
+            }
+        } while (!opcion.equals("6"));
+    }
+
+}
